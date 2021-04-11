@@ -22,8 +22,8 @@ def split_data(dataframe, ratio):
 
 
 def eval(predictions, targets):
-    # acc = metrics.accuracy_score(targets, predictions)
-    # print("Accurayc:", acc)
+    acc = metrics.accuracy_score(targets, predictions)
+    print("Accurayc:", acc)
     #
     cf = metrics.confusion_matrix(test_targets, predictions)
     print(cf)
@@ -56,13 +56,13 @@ if __name__ == "__main__":
     for t in test_targets:
         if t == 1: c += 1
 
-    print("C:", c)
+    print("Winners to classify:", c)
 
 
     # run model
-    # model = RandomForestClassifier()
-    # model.fit(train_set, train_targets)
-    # predictions = model.predict(test_set)
-    #
-    # # eval
-    # eval(predictions, test_targets)
+    model = RandomForestClassifier()
+    model.fit(train_set, train_targets)
+    predictions = model.predict(test_set)
+
+    # eval
+    eval(predictions, test_targets)
