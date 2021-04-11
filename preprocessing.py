@@ -1,5 +1,5 @@
 import pandas as pd
-
+from sklearn import preprocessing
 
 def remove_columns(dataframe):
     """
@@ -41,6 +41,8 @@ def remove_columns(dataframe):
     df = df.drop("Rail",  axis = 1)
     df = df.drop("Decimalmargin",  axis = 1)
     df = df.drop("StartingPricePlace",  axis = 1)
+    df = df.drop("TrackWeather",  axis = 1)
+    df = df.drop("RaceClass",  axis = 1)
 
     return df
 
@@ -99,12 +101,46 @@ def win_loss_conversion(dataframe):
 
 
 
+def convert_strings(dataframe):
+    df = dataframe
+    columns = ["Track", "DayType", "TrackCondition", "NoAllowances", "ClassGender", "ClassWeight", "RaceTrackCondition", "RaceWeather", "Gender", "TrainerLocation"]
+
+    le = preprocessing.LabelEncoder()
+    for column_name in columns:
+        if df[column_name].dtype == object:
+            df[column_name] = le.fit_transform(df[column_name])
+        else:
+            pass
+
+    return df
+
+
+def convert_missing_to_string(dataframe, column):
+    """
+    Convert a missing value in a categorical field to "Unknown".
+    This ensures all values in thge field are the same type.
+    """
+    df = dataframe
+
+    for i in range(len(df.index)):
+        if type(df.loc[i, column]) == float or type(df.loc[i, column]) == int:
+            df.loc[i, column] = "Unknown"
+
+    return df
+
+
+
 if __name__ == "__main__":
     df = read_all(49601, 99)
 
     df = remove_columns(df)
     df = fix_index(df)
     df = win_loss_conversion(df)
+    df = convert_missing_to_string(df, "TrainerLocation")
+    df = convert_strings(df)
+
+    # remove nan prices (useless values)
+    df = df.dropna(subset = ["StartingPriceWin"])
 
     df.to_csv('pre_processed.csv', encoding='utf-8', index_label = "UniqueID")
 
