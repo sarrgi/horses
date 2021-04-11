@@ -1,4 +1,4 @@
-## Horses n that
+ ## Horses n that
 
 sites:
 - https://www.racingnsw.com.au/wp-content/uploads/PI_user_manual_2019_01.pdf
@@ -32,8 +32,9 @@ alternative stats for dayID joining:
         - trainer
         - sire / sireID
         - dam / damID
-        - TrackWeather
+        - TrackWeather5
         - class / classAge
+        - rail
 
     - correlated:
         - weightdifference, carried weight, weight
@@ -47,7 +48,9 @@ alternative stats for dayID joining:
             - note: not all place values exist for prices
 
     - all removed fields for initial set:
-        - all emtpy values
+        - racegroup
+        - minweight
+        - traditional margin
         - weightdifference
         - MeetingID
         - Date
@@ -63,3 +66,20 @@ alternative stats for dayID joining:
         - HorseID
         - Barrier
         - ToteNumber
+        - Stake
+        - Stake.1
+        - GearWorn
+        - RaceName
+        - Sire
+        - Dam
+        - HorseName
+        - Trainer
+        - JockeyName
+        - time (as direct correl to winning...)
+        - Actualtime
+        - Time
+        - Last600mTime
+        - RaceID
+        - Rail
+        - Decimalmargin
+        - StartingPricePlace
