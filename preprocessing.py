@@ -1,17 +1,20 @@
 import pandas as pd
 from sklearn import preprocessing
 
-def remove_columns(dataframe):
+import numpy as np
+
+def remove_columns(df):
     """
     Remove useless columns.
     """
-    df = dataframe
+
+    # print(df.columns)
 
     df = df.drop("RaceGroup", axis = 1)
     df = df.drop("MinWeight", axis = 1)
     df = df.drop("Traditionalmargin", axis = 1)
     df = df.drop("WeightDifference", axis = 1)
-    df = df.drop("MeetingID", axis = 1)
+    # df = df.drop("MeetingID", axis = 1)
     df = df.drop("Date", axis = 1)
     df = df.drop("JetBet", axis = 1)
     df = df.drop("MeetingType", axis = 1)
@@ -34,10 +37,11 @@ def remove_columns(dataframe):
     df = df.drop("Trainer", axis = 1)
     df = df.drop("JockeyName", axis = 1)
 
-    df = df.drop("Actualtime", axis = 1)
+    # df = df.drop("Actualtime", axis = 1)
+    # df = df.drop("Finishingposition", axis = 1)
     df = df.drop("Time", axis = 1)
     df = df.drop("Last600mTime", axis = 1)
-    df = df.drop("RaceID",  axis = 1)
+    # df = df.drop("RaceID",  axis = 1)
     df = df.drop("Rail",  axis = 1)
     df = df.drop("Decimalmargin",  axis = 1)
     df = df.drop("StartingPricePlace",  axis = 1)
@@ -69,11 +73,10 @@ def read_all(start_ind, amount):
 
 
 
-def fix_index(dataframe):
+def fix_index(df):
     """
     Fix for having to load in the indexs for each file at a time.
     """
-    df = dataframe
 
     df = df.reset_index()
     df = df.drop('index', axis = 1)
@@ -83,13 +86,12 @@ def fix_index(dataframe):
 
 
 
-def win_loss_conversion(dataframe):
+def win_loss_conversion(df):
     """
     Convert Finishingposition variable to a winloss category where:
         - 0 = Not the Winner
         - 1 = Winner
     """
-    df = dataframe
 
     for i in range(len(df.index)):
         if df.loc[i, 'Finishingposition'] == 1:
@@ -100,9 +102,45 @@ def win_loss_conversion(dataframe):
     return df
 
 
+def placing_conversion(df):
+    """
+    Convert the placing into a value respective of the race amount.
+    """
+    # meeting id RaceID
 
-def convert_strings(dataframe):
-    df = dataframe
+    p = df['Finishingposition'].unique()
+    print(p)
+
+    for i in range(len(df.index)):
+        # if(df.loc[i, "Finishingposition"]==np.nan):
+        #     print(df.loc[i, 'MeetingID'], "!!!!")
+
+        # extract amount of horses in the race
+        meet_id = df.loc[i, 'MeetingID']
+        race_id = df.loc[i, 'RaceID']
+        race_count = len(df.loc[(df['MeetingID'] == meet_id) & (df['RaceID'] == race_id)])
+        # update position
+        pos = df.loc[i, 'Finishingposition']
+        # remove equal positions
+        if "=" in str(pos):
+            pos = pos.strip("=")
+        # set error positions to last (for now)
+        if pos == "D" or pos == "LR" or pos == "P": #TODO FIND DEFINITION - set to last for now (simplification)
+            pos = race_count
+
+        df.loc[i, 'Finishingposition'] = round(float(pos)/float(race_count), 4)
+        # print(df.loc[i, 'Finishingposition'])
+
+    # remove these columns as no longer required
+    # df = df.drop("MeetingID")
+    # df = df.drop("RaceID")
+
+
+    return df
+
+
+
+def convert_strings(df):
     columns = ["Track", "DayType", "TrackCondition", "NoAllowances", "ClassGender", "ClassWeight", "RaceTrackCondition", "RaceWeather", "Gender", "TrainerLocation"]
 
     le = preprocessing.LabelEncoder()
@@ -115,12 +153,11 @@ def convert_strings(dataframe):
     return df
 
 
-def convert_missing_to_string(dataframe, column):
+def convert_missing_to_string(df, column):
     """
     Convert a missing value in a categorical field to "Unknown".
     This ensures all values in thge field are the same type.
     """
-    df = dataframe
 
     for i in range(len(df.index)):
         if type(df.loc[i, column]) == float or type(df.loc[i, column]) == int:
@@ -135,7 +172,8 @@ if __name__ == "__main__":
 
     df = remove_columns(df)
     df = fix_index(df)
-    df = win_loss_conversion(df)
+    # df = win_loss_conversion(df)
+    df = placing_conversion(df)
     df = convert_missing_to_string(df, "TrainerLocation")
     df = convert_strings(df)
 
